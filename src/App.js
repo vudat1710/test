@@ -15,6 +15,17 @@ function App() {
   const [data, setData] = useState(null);
   const [textResult, setTextResult] = useState("");
 
+  const getBase64 = (file, cb) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+        cb(reader.result)
+    };
+    reader.onerror = function (error) {
+        console.log('Error: ', error);
+    };
+}
+
   useEffect(() => {
     // Lazily obtain recorder first time we're recording.
     if (recorder === null) {
@@ -35,7 +46,9 @@ function App() {
     const handleData = (e) => {
       // console.log(e)
       setAudioURL(URL.createObjectURL(e.data));
-      setData(e.data);
+      getBase64(e.data, (result) => {
+        setData(result);
+   });
     };
 
     recorder.addEventListener("dataavailable", handleData);
@@ -54,7 +67,7 @@ function App() {
 
   const handleOnClick = async () => {
     setTimeout(100);
-    console.log(data.toString())
+    console.log(data)
     await axios
       .post('http://127.0.0.1:5000/api/asr', data.toString())
       .then((res) => {
