@@ -42,7 +42,7 @@ function App() {
     return () => recorder.removeEventListener("dataavailable", handleData);
   }, [recorder, isRecording]);
 
-  console.log(audioURL);
+  // console.log(audioURL);
 
   const startRecording = () => {
     setIsRecording(true);
@@ -54,8 +54,9 @@ function App() {
 
   const handleOnClick = async () => {
     setTimeout(100);
+    console.log(data.toString())
     await axios
-      .post(`localhost:5000/asr`, 'filename.weba')
+      .post('http://127.0.0.1:5000/api/asr', data.toString())
       .then((res) => {
         setTextResult(res.data.text);
       })
