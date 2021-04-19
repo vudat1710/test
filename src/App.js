@@ -15,16 +15,26 @@ function App() {
   const [data, setData] = useState(null);
   const [textResult, setTextResult] = useState("");
 
-  const getBase64 = (file, cb) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = function () {
-        cb(reader.result)
-    };
-    reader.onerror = function (error) {
-        console.log('Error: ', error);
-    };
-}
+  const getBase64 = file => {
+    return new Promise(resolve => {
+      let fileInfo;
+      let baseURL = "";
+      // Make new FileReader
+      let reader = new FileReader();
+
+      // Convert the file to base64 text
+      reader.readAsDataURL(file);
+
+      // on reader load somthing...
+      reader.onload = () => {
+        // Make a fileInfo Object
+        console.log("Called", reader);
+        baseURL = reader.result;
+        resolve(baseURL);
+      };
+      console.log(fileInfo);
+    });
+  };
 
   useEffect(() => {
     // Lazily obtain recorder first time we're recording.
@@ -46,9 +56,9 @@ function App() {
     const handleData = (e) => {
       // console.log(e)
       setAudioURL(URL.createObjectURL(e.data));
-      getBase64(e.data, (result) => {
+      getBase64(e.data).then(result => {
         setData(result);
-   });
+      })
     };
 
     recorder.addEventListener("dataavailable", handleData);
@@ -67,9 +77,8 @@ function App() {
 
   const handleOnClick = async () => {
     setTimeout(100);
-    console.log(data)
     await axios
-      .post('http://127.0.0.1:5000/api/asr', data.toString())
+      .post('http://127.0.0.1:5000/api/asr', {text: data})
       .then((res) => {
         setTextResult(res.data.text);
       })
@@ -94,9 +103,9 @@ function App() {
         </div>
       </div>
       <div className="line">
-        <a href={audioURL} onClick={() => handleOnClick()} download="filename.weba">
+        <button onClick={() => handleOnClick()}>
           Click here to analyze
-        </a>
+        </button>
       </div>
       <div className="line">Result: {textResult}</div>
     </div>
